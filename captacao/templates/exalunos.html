@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+    <div class="ui grid grid-style">
+        <div class="four column row">
+            <div class="left floated column">
+                <h1 class="ui left floated blue_color">Ex-Alunos</h1>
+            </div>
+
+            <div class="right floated column" style="display: flex; justify-content: right;">
+                <form class="ui form" action="{% url 'exalunos' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% include 'filter.html' with url_redirect='exalunos' %}
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center">
+        {% if filtro %}
+            <h2>Período selecionado:&nbsp<span id="name-periodo">{{ filtro }}</span></h2>
+        {% endif %}
+    </div>
+
+    <table id="table-geral" class="hover">
+        <thead>
+        <tr>
+            {% comment %}<th>Período</th>{% endcomment %}
+            <th>Polo</th>
+            <th>Nome</th>
+            <th>RA</th>
+            <th>Telefone</th>
+            <th>E-mail</th>
+            <th>Curso</th>
+            <th>Status Matr</th>
+            <th>Ano ingresso</th>
+            <th>Saída</th>
+            <th>Último Atendimento</th>
+            <th>Atendimentos</th>
+            <th>Editar</th>
+            <th>Excluir</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for exaluno in exalunos %}
+            <tr>
+                {% comment %}<td>{{ exaluno.periodo }}</td>{% endcomment %}
+                <td>{{ exaluno.nom_campus.nome_abrev }}</td>
+                <td>{{ exaluno.nom_aluno }}</td>
+                <td>{{ exaluno.cod_ra }}</td>
+
+                {% if exaluno.telefone1 %}
+                    <td>{{ exaluno.telefone1 }}</td>
+                {% elif exaluno.telefone2 %}
+                    <td>{{ exaluno.telefone2 }}</td>
+                {% elif exaluno.telefone_res %}
+                    <td>{{ exaluno.telefone_res }}</td>
+                {% else %}
+                    <td>Não informado</td>
+                {% endif %}
+
+                <td>{{ exaluno.email }}</td>
+                <td>{{ exaluno.nom_curso_grupo.nome_abrev }}</td>
+                <td>{{ exaluno.dsc_status_matr }}</td>
+                <td>{{ exaluno.turma_ano_ingresso_abrev }}</td>
+                <td>{{ exaluno.data_saida|date:"d/m/Y" }}</td>
+                <td>{{ exaluno.status_atendimento }}</td>
+                <td>
+                    <a href="#" onclick="open_modal('{% url 'atendimentos_exaluno' exaluno.id %}')">
+                        <i class="phone square icon black"></i>
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onclick="open_modal('{% url 'modal_atualiza_exaluno' exaluno.id %}')">
+                        <i class="edit icon black"></i>
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onclick="open_modal('{% url 'modal_remove_exaluno' exaluno.id %}')"
+                       type="submit" id="remover"><i class="trash icon black"></i>
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <th>Período</th>
+            <th>Polo</th>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Curso</th>
+            <th>Status Matr</th>
+            <th>Ano Ingresso</th>
+            <th>Saída</th>
+            <th>Último Atendimento</th>
+        </tr>
+        </tfoot>
+    </table>
+
+{% endblock %}
+
+{% block extrajs %}
+    <script>
+        $('#showmodal-exaluno').click(function () {
+            $('#addExAluno').modal('show');
+        });
+    </script>
+{% endblock %}

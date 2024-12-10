@@ -1,0 +1,322 @@
+{% load static %}
+{% load widget_tweaks %}
+
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Controle de Captação</title>
+
+    <link rel="stylesheet" href="//cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+          integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+            integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"
+            integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="//cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <style>
+        .pusher {
+            padding: 50px;
+        }
+
+        .blue_color {
+            color: #1678C2;
+        }
+
+        .blue_background {
+            background-color: #1678C2 !important;
+            color: white !important;
+            font-size: 18px !important;
+        }
+
+        .pusher-ref {
+            padding: 20px !important;
+        }
+
+        a.sidebar_toggle {
+            color: white !important;
+        }
+
+        a.sidebar_toggle::before {
+            background-color: white !important;
+        }
+
+        a.sidebar_toggle:hover {
+            background-color: #003366 !important;
+        }
+
+        .grid-style {
+            padding: 30px 0 50px 0 !important;
+        }
+
+        #table-geral {
+            width: 100%;
+            background-color: #1678C2;
+            border-radius: 5px;
+        }
+
+        #table-geral thead {
+            color: white;
+        }
+
+        #table-geral th:first-child {
+            padding-left: 10px;
+            text-align: left
+        }
+
+        #table-geral td:first-child {
+            padding-left: 10px;
+            text-align: left
+        }
+
+        #table-geral th {
+            padding-left: 0;
+            text-align: left;
+        }
+
+        #table-geral td {
+            padding-left: 0;
+            text-align: left;
+        }
+
+        .form-ref {
+            padding: 20px;
+            background-color: #d7d8e0;
+        }
+
+        body {
+            background: #EEE;
+        }
+
+        .actions-buttons {
+            margin-left: 0 !important;
+        }
+
+        .dataTables_filter {
+            margin-bottom: 10px;
+        }
+
+        .box-chart {
+            border: 1px solid gainsboro;
+            background: white;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="context">
+    <div class="ui top attached menu blue_background">
+        <a class="item" id="menu-sidebar" style="padding: 0 30px; color: white">
+            <i class="sidebar icon"></i>
+            Menu
+        </a>
+        <div class="right menu">
+            <div class="item" style="color: white">
+                {% if request.user.first_name %}
+                    <h4>{{ request.user.first_name|lower|capfirst }}</h4>
+                {% else %}
+                    <h4>{{ request.user.username }}</h4>
+                {% endif %}
+            </div>
+            <div class="ui dropdown item" style="color: white">
+                {% if user.profile.filepath %}
+                    <img id="photo-profile" class="ui avatar image" src="{{ user.profile.filepath.url }}" alt="">
+                {% else %}
+                    <img id="photo-profile" class="ui avatar image" src="/media/anonymous_user.png" alt="">
+                {% endif %}
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                    <a href="/admin/" class="item">Administração</a>
+                    <a href="#" class="item" onclick="open_modal('{% url 'upload_photo' %}')">
+                        Meu Perfil
+                    </a>
+                    <a href="{% url 'logout' %}" class="item">Sair</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui bottom attached segment pushable">
+        <div class="ui blue_background labeled icon left inline vertical sidebar menu" style="">
+            <a href="{% url 'dashboard' %}" class="item sidebar_toggle">Dashboard</a>
+            <a href="{% url 'candidatos' %}" class="item sidebar_toggle">Candidatos</a>
+            <a href="{% url 'inscritos' %}" class="item sidebar_toggle">Inscritos</a>
+            <a href="{% url 'exalunos' %}" class="item sidebar_toggle">Ex alunos</a>
+            <a href="{% url 'alunos' %}" class="item sidebar_toggle">Alunos</a>
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="item sidebar_toggle">Sair</a>
+            {% endif %}
+        </div>
+        <div class="pusher pusher-ref" style="height: 100vh; background: #EEE;">
+            <div class="ui basic segment">
+                {% block content %} {% endblock %}
+                <div class="ui modal" id="open-modal" tabindex="-1" role="dialog"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'create_new.html' %}
+
+<script>
+    $('.event-modal').modal({allowMultiple: true});
+
+    h4 = ''
+
+    function open_modal(url) {
+        $('#open-modal').focus().load(url, function () {
+            $(this).modal('show');
+        });
+    }
+
+    function uploadPhoto(event) {
+        event.preventDefault();
+        var data = new FormData($('#form-photo').get(0));
+        $.ajax({
+            url: '{% url 'upload_photo' %}',
+            type: 'POST',
+            data: data,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                elemPhoto = document.getElementById("photo-profile")
+                elemItems = elemPhoto.src.split('/')
+                elemPhoto.src = elemPhoto.src.replace(elemItems[elemItems.length - 1], response.filepath)
+                $('#closeModalUploadPhoto').click();
+            }
+        });
+        return false;
+    }
+
+    function get_plus(elem) {
+        h4 = $(elem).parent('h4').text().trim()
+        $('.title-header').text('Criar novo ' + h4).addClass('blue_color')
+        $('#criar-novo').modal('show');
+    }
+
+    $('#filter-periodo').click(function () {
+        $('filter-periodo').sidebar('toggle');
+    });
+
+    $('.ui.accordion').accordion();
+
+    $('#showLoading').click(function () {
+        $('#dimmer').dimmer('show');
+        {% comment %}$('#dimmer').dimmer('hide');{% endcomment %}
+    });
+
+    // using context
+    $('.context .ui.sidebar')
+        .sidebar({
+            context: $('.context .bottom.segment')
+        })
+        .sidebar('attach events', '#menu-sidebar')
+    ;
+
+    $(document).ready(function () {
+        $('#table-geral').DataTable({
+            initComplete: function () {
+                this.api().columns().every(function () {
+                    var column = this;
+                    var select = $('<select style="border-radius: 4px;"><option value=""></option></select>')
+                        .appendTo($(column.footer()).empty())
+                        .on('change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex($(this).val());
+                            column.search(val ? '^' + val + '$' : '', true, false).draw();
+                        });
+                    column.data().unique().sort().each(function (d, j) {
+                        select.append('<option value="' + d + '">' + d + '</option>')
+                    });
+                });
+            },
+            {% comment %}"order": [[ 0, 'dsc' ], [ 1, 'dsc' ]],{% endcomment %}
+            ordering: false,
+            {% comment %}scrollCollapse: true,{% endcomment %}
+            {% comment %}scrollX: true,{% endcomment %}
+
+            "language": {
+                "lengthMenu": 'Listando <select>' +
+                    '<option value="10">10</option>' +
+                    '<option value="20">20</option>' +
+                    '<option value="50">50</option>' +
+                    '<option value="100">100</option>' +
+                    '<option value="-1">Todos</option>' +
+                    '</select> registros por página',
+
+                "zeroRecords": "Nenhum registro localizado",
+                "info": "Página _PAGE_ de _PAGES_ - Visualizando _END_ de _TOTAL_ registros nesta página",
+                "infoEmpty": "Nenhum registro localizado para essa busca",
+                "infoFiltered": "",
+                {% comment %}"infoPostFix": " (Total _MAX_)",{% endcomment %}
+                "thousands": ".",
+                "search": "Buscar",
+                "paginate": {
+                    "first": "Primeira",
+                    "last": "Última",
+                    "next": "Próxima",
+                    "previous": "Anterior"
+                },
+            }
+        });
+    });
+
+    function salvar_novo(event) {
+        $.ajax({
+            url: '{% url 'create_new_name' %}',
+            type: 'get',
+            data: {
+                novo_nome: $('input[name=novo-nome]').val().trim(),
+                h4_text: h4
+            },
+            success: function (response) {
+                $(response.novo.select_id).append($("<option></option>").attr("value", response.novo.id).attr("selected", "").text(response.novo.nome));
+                $('#criar-novo').modal('hide');
+                $('#novo-nome').val('');
+            },
+            error: function () {
+                console.log("ERROR")
+            }
+        });
+        event.preventDefault();
+    }
+
+    $('.ui.dropdown').dropdown();
+
+    function no_periodo_selected() {
+        $("#filter-periodo").dropdown('set selected', '0');
+    }
+
+    function selectedPeriodo() {
+        $("#name-periodo").text($("#selected-periodo").text())
+    }
+
+    $(function () {
+        $(".datepicker").datepicker({
+            dateFormat: 'dd/mm/yy',
+            dayNamesMin: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+            monthNames: [
+                'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho',
+                'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+            ],
+        });
+    });
+
+</script>
+{% block extrajs %}{% endblock %}
+
+</body>
+</html>

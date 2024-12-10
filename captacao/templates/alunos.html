@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+    <div class="ui grid grid-style">
+        <div class="four column row">
+            <div class="left floated column">
+                <h1 class="ui left floated blue_color">Alunos</h1>
+            </div>
+
+            <div class="right floated column" style="display: flex; justify-content: right;">
+                <form class="ui form" action="{% url 'alunos' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% include 'filter.html' with url_redirect='alunos' %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; justify-content: center">
+        {% if filtro %}
+            <h2>Período selecionado:&nbsp<span id="name-periodo">{{ filtro }}</span></h2>
+        {% endif %}
+    </div>
+
+    <table id="table-geral" class="hover">
+        <thead>
+        <tr>
+            <th>Polo</th>
+            <th>Curso grupo</th>
+            <th>Modalidade</th>
+            <th>Serie</th>
+            <th>RA</th>
+            <th>Nome do aluno</th>
+            <th>Status</th>
+            <th>Ano ingresso</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Telefone res</th>
+            <th>Bolsista</th>
+            <th>Data ingresso</th>
+            <th>Previsão de término</th>
+            <th>Último Atendimento</th>
+            <th>Atendimentos</th>
+            <th>Editar</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for aluno in alunos %}
+            <tr>
+                <td>{{ aluno.nom_campus.nome_abrev }}</td>
+                <td>{{ aluno.nom_curso_grupo.nome_abrev }}</td>
+                <td>{{ aluno.dsc_modalidade.nome_abrev }}</td>
+                <td>{{ aluno.serie }}</td>
+                <td>{{ aluno.cod_ra }}</td>
+                <td>{{ aluno.nom_aluno }}</td>
+                <td>{{ aluno.status_aluno }}</td>
+                <td>{{ aluno.turma_ano_ingresso_abrev }}</td>
+                <td>{{ aluno.email }}</td>
+                {% if aluno.telefone1 == None %}
+                    <td>Não informado</td>
+                {% else %}
+                    <td>{{ aluno.telefone1 }}</td>
+                {% endif %}
+                {% if aluno.telefone_res == None %}
+                    <td>Não informado</td>
+                {% else %}
+                    <td>{{ aluno.telefone_res }}</td>
+                {% endif %}
+                <td>{{ aluno.bolsista }}</td>
+                <td>{{ aluno.dat_ingresso|date:"d/m/Y" }}</td>
+                <td>{{ aluno.data_prev_termino|date:"d/m/Y" }}</td>
+                <td>{{ aluno.status_atendimento }}</td>
+                <td>
+                    <a href="#" onclick="open_modal('{% url 'atendimentos_aluno' aluno.id %}')">
+                        <i class="phone square icon black"></i>
+                    </a>
+                </td>
+                <td>
+                    <a href="#" onclick="open_modal('{% url 'modal_atualiza_aluno' aluno.id %}')">
+                        <i class="edit icon black"></i>
+                    </a>
+                </td>
+                {% comment %}<td>
+                    <a href="#" onclick="open_modal('{% url 'modal_remove_aluno' aluno.id %}')"
+                       type="submit" id="remover"><i class="trash icon black"></i>
+                    </a>
+                </td>{% endcomment %}
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr>
+            <th>Polo</th>
+            <th>Curso grupo</th>
+            <th>Modalidade</th>
+            <th>Serie</th>
+            <th>Código RA</th>
+            <th>Nome do aluno</th>
+            <th>Status do aluno</th>
+            <th>Ano ingresso</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th>Telefone res</th>
+            <th>Bolsista</th>
+            <th>Data ingresso</th>
+            <th>Previsão de término</th>
+            <th>Último Atendimento</th>
+        </tr>
+        </tfoot>
+    </table>
+
+{% endblock %}
+
+{% block extrajs %}
+    <script>
+        {% comment %}function no_periodo_selected() {
+            $("#filter-periodo").dropdown('set selected', '0');
+        }
+
+        function selectedPeriodo() {
+            $("#name-periodo").text($("#selected-periodo").text())
+        }{% endcomment %}
+    </script>
+{% endblock %}
